@@ -5,8 +5,6 @@ SOURCES = source
 INCLUDES = include
 
 # Toolchain
-CC = $(PREFIX)gcc
-CXX = $(PREFIX)g++
 LD = $(PREFIX)ld
 OBJCOPY = $(PREFIX)objcopy
 STRIP = $(PREFIX)strip
