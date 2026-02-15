@@ -8,7 +8,7 @@ INCLUDES = include
 LD = $(PREFIX)ld
 OBJCOPY = $(PREFIX)objcopy
 STRIP = $(PREFIX)strip
-
+CC = $(PREFIX)cc
 # Paths
 DEVKITPRO = /opt/devkitpro
 DEVKITPPC = $(DEVKITPRO)/devkitPPC
