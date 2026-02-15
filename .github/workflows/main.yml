@@ -31,11 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: |
-           *.dol
-           *.map
-           *.elf
-           build/*.dol
-           build/*.elf
-           build/*.map
-          # Can be a file, directory, or wildcard pattern
+          path: wii-heimdall.dol
