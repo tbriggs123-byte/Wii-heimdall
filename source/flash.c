@@ -269,19 +269,19 @@ int samsung_send_file_end(uint32_t file_size, uint32_t checksum) {
 // Wait for ACK
 int samsung_wait_ack(void) {
     uint8_t ack_buffer[16];
-    // Correct way to call it in flash.c
-    uint8_t* data_ptr = ack_buffer;
-    uint32_t data_len = 16;
-    usb_receive_bulk(&data_ptr, &data_len);
-}
-    
-    // Check if it's an ACK
+    uint8_t* p_ack = ack_buffer;
+    uint32_t len = 16;
+
+    if (usb_receive_bulk(&p_ack, &len) != 0) {
+        return -1;
+    } // This closes the IF, not the function
+
     if (*(uint32_t*)ack_buffer != 0x00000000) {
         return -1;
     }
-    
+
     return 0;
-}
+} // This closes the function
 
 // Send PIT file
 int samsung_send_pit(const uint8_t* pit_data, uint32_t pit_size) {
