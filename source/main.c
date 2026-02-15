@@ -84,7 +84,8 @@ void handle_pit_load(void) {
         PitInfo* pit = heimdall_get_pit_info();
         if (pit) {
             char info[256];
-            snprintf(info, sizeof(info), "PIT: %d partitions, Device: %s", pit->partition_count, pit->device_name);
+            // Corrected line 87 in main.c
+            snprintf(info, sizeof(info), "PIT: %u partitions, Device: %s", pit->entry_count, pit->device_name);
             gui_log(info, MSG_INFO);
         }
     } else {
