@@ -105,9 +105,9 @@ void handle_flashing(void) {
         return;
     }
     
-    char msg[256];
+    // source/main.c around line 105
+     char msg[512]; // Increased from 256 to fix truncation warning
     snprintf(msg, sizeof(msg), "Flashing %s to %s...", filename, partition);
-    gui_show_message(msg, MSG_INFO);
     
     // Pass the function pointer instead of a lambda
     int result = heimdall_flash_file(filename, partition, on_flash_progress);
