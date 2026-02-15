@@ -12,15 +12,9 @@ static uint8_t usb_endpoint_in = 0x81;
 static uint8_t* usb_buffer = NULL;
 static uint32_t usb_buffer_size = 0x10000;
 
-int usb_init(void) {
-    if (usb_initialized) return 0;
-    if (USB_Initialize() < 0) return -1;
-    
-    usb_buffer = memalign(32, usb_buffer_size);
-    if (!usb_buffer) return -1;
-    
-    usb_initialized = 1;
-    return 0;
+int usb_init_device(void) {
+    if (usb_init() < 0) return -1;
+    return usb_open_device(0); 
 }
 
 int usb_open_device(int index) {
