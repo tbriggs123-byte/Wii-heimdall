@@ -5,6 +5,7 @@
 #include <gccore.h>
 #include <stdint.h>
 #include "pit.h"
+
 // Callback types
 typedef int (*ProgressCallback)(float progress, const char* status);
 typedef void (*LogCallback)(const char* message, int type);
@@ -30,5 +31,10 @@ void heimdall_set_log_callback(LogCallback cb);
 int heimdall_verify_file(const char* filename);
 uint32_t heimdall_calculate_checksum(const uint8_t* data, uint32_t length);
 int heimdall_is_samsung_device(uint16_t vid, uint16_t pid);
+
+// Add these prototypes to include/heimdall.h
+int heimdall_detect_device(void);
+int heimdall_load_pit(const char* filename);
+PitInfo* heimdall_get_pit_info(void);
 
 #endif
