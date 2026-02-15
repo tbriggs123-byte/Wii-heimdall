@@ -7,8 +7,9 @@ export PATH := $(DEVKITPPC)/bin:$(PATH)
 # Wii Heimdall Complete Makefile
 TARGET = wii-heimdall
 BUILD = build
-SOURCES = source
-INCLUDES = include
+# Change these to dot (current directory)
+SOURCES = .
+INCLUDES = ../include
 
 # Toolchain - Updated to powerpc-eabi-gcc for Wii
 PREFIX = powerpc-eabi-
@@ -26,6 +27,7 @@ CFLAGS = -g -O2 -Wall -mrvl -mcpu=750 -meabi -mhard-float \
          -I$(INCLUDES)
 
 # Add this line to define the library path
+# Update LIBPATHS to go up one level if needed
 LIBPATHS = -L$(DEVKITPRO)/libogc/lib/wii
 
 # Update your LDFLAGS to include those paths
