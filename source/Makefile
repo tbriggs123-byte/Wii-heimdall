@@ -55,6 +55,6 @@ $(TARGET).elf: $(OBJS) \
     $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 # Compile C files
-$(SOURCES)/%.c \
+$(SOURCES).c: $(OBJS) \
     @mkdir -p $(BUILD) \
     $(CC) $(CFLAGS) -c $< -o $@
