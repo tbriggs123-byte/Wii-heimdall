@@ -22,7 +22,6 @@ jobs:
         # This step runs the 'make' command in the root of your repository
         # It assumes your project's Makefile is at the root level
         run: |
-          dkp-pacman -S --noconfirm wii-dev
           export DEVKITPPC=/opt/devkitpro/devkitPPC
           export DEVKITPRO=/opt/devkitpro
           cd source
