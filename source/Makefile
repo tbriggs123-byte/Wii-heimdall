@@ -5,7 +5,6 @@ SOURCES = source
 INCLUDES = include
 
 # Toolchain
-PREFIX = powerpc-eabi-
 CC = $(PREFIX)gcc
 CXX = $(PREFIX)g++
 LD = $(PREFIX)ld
