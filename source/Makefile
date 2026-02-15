@@ -25,7 +25,11 @@ CFLAGS = -g -O2 -Wall -mrvl -mcpu=750 -meabi -mhard-float \
          -I$(DEVKITPRO)/libfat/include \
          -I$(INCLUDES)
 
-LDFLAGS = -g -mrvl -mcpu=750 -Wl,-Map,$(TARGET).map
+# Add this line to define the library path
+LIBPATHS = -L$(DEVKITPRO)/libogc/lib/wii
+
+# Update your LDFLAGS to include those paths
+LDFLAGS = -g -mrvl -mcpu=750 $(LIBPATHS) -Wl,-Map,$(TARGET).map
 
 # Source files
 C_SOURCES = $(wildcard $(SOURCES)/*.c)
