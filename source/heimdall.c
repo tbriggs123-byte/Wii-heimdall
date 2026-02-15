@@ -52,3 +52,41 @@ int heimdall_init(void) {
 }
 
 // ... rest of your heimdall.c functions ...
+// Add these to source/heimdall.c
+
+// 1. Detect Device
+int heimdall_detect_device(void) {
+    if (usb_init_device() == 0) {
+        if (usb_is_connected()) return 0;
+    }
+    return -1;
+}
+
+// 2. Load PIT from file
+int heimdall_load_pit(const char* filename) {
+    FILE* f = fopen(filename, "rb");
+    if (!f) return -1;
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    uint8_t* buffer = malloc(size);
+    if (!buffer) {
+        fclose(f);
+        return -2;
+    }
+
+    fread(buffer, 1, size, f);
+    fclose(f);
+
+    // Use the pit_parse function from pit.c
+    int result = pit_parse(buffer, size, &current_pit);
+    free(buffer);
+    return result;
+}
+
+// 3. Get PIT Info
+PitInfo* heimdall_get_pit_info(void) {
+    return &current_pit;
+}
