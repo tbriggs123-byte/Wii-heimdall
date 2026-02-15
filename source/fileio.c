@@ -236,7 +236,7 @@ int fileio_get_sd_total_space(uint64_t* total_bytes) {
     }
     
     // Use statvfs if available, otherwise estimate
-    *total_bytes = 2048 * 1024 * 1024; // 2GB estimate
+    *total_bytes = 2048ULL * 1024ULL * 1024ULL;
     
     return 0;
 }
