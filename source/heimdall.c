@@ -11,6 +11,72 @@
 #include <ctype.h>
 #include "heimdall.h"
 #include "pit.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "heimdall.h"
+#include "usb.h"
+
+#define FLASH_CHUNK_SIZE (16 * 1024) // 16KB chunks are standard for Heimdall
+
+int heimdall_flash_file(const char* filename, const char* partition, int (*progress_cb)(float, const char*)) {
+    FILE* f = fopen(filename, "rb");
+    if (!f) {
+        if (progress_cb) progress_cb(0, "Error: Could not open file");
+        return -1;
+    }
+
+    // Get total file size for progress calculation
+    fseek(f, 0, SEEK_END);
+    long total_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    // 1. Tell the device we are starting a flash session for this partition
+    // This usually involves sending a specific "Flash Start" PIT command over USB
+    if (usb_start_flash_session(partition) != 0) {
+        fclose(f);
+        return -2;
+    }
+
+    uint8_t* buffer = malloc(FLASH_CHUNK_SIZE);
+    long bytes_sent = 0;
+    int result = 0;
+
+    while (bytes_sent < total_size) {
+        size_t to_read = (total_size - bytes_sent > FLASH_CHUNK_SIZE) ? 
+                          FLASH_CHUNK_SIZE : (total_size - bytes_sent);
+        
+        size_t read = fread(buffer, 1, to_read, f);
+        if (read <= 0) break;
+
+        // 2. Transmit the chunk via USB
+        if (usb_send_data(buffer, read) != 0) {
+            result = -3; // USB Transfer Error
+            break;
+        }
+
+        bytes_sent += read;
+
+        // 3. Update the GUI via the callback
+        if (progress_cb) {
+            float percent = (float)bytes_sent / (float)total_size;
+            char status[64];
+            snprintf(status, sizeof(status), "Sent %ld/%ld bytes", bytes_sent, total_size);
+            
+            // If the callback returns 0, the user wants to cancel
+            if (progress_cb(percent, status) == 0) {
+                result = -4; // User Cancelled
+                break;
+            }
+        }
+    }
+
+    // 4. Finalize the session
+    usb_end_flash_session();
+    
+    free(buffer);
+    fclose(f);
+    return result;
+}
 
 // Reference to the PIT loaded in pit.c or heimdall_load_pit
 extern PitInfo current_pit; 
