@@ -1,4 +1,3 @@
-// source/main.c
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 #include <fat.h>
@@ -9,7 +8,7 @@
 #include "heimdall.h"
 #include "config.h"
 
-// Application state
+// Application state and data (Matches your struct)
 typedef enum {
     STATE_MAIN_MENU,
     STATE_DEVICE_DETECT,
@@ -36,12 +35,14 @@ static AppData app;
 static int running = 1;
 
 // --- Callback for Flashing Progress ---
-// C does not support lambdas, so we use a standard function
+// Matches signature: void gui_set_progress(float progress, const char* label);
 int on_flash_progress(float progress, const char* status) {
     app.flash_progress = progress;
     strncpy(app.status_text, status, sizeof(app.status_text)-1);
+    
+    // Updated to match gui.h signature
     gui_set_progress(progress, status);
-    return 1; // Continue flashing
+    return 1; 
 }
 
 // --- State Machine Handlers ---
@@ -64,7 +65,9 @@ void handle_main_menu(u32 pressed) {
 }
 
 void handle_device_detect(void) {
+    // Matches signature: void gui_show_message(const char* message, int type);
     gui_show_message("Detecting Samsung device...", MSG_INFO);
+    
     if (heimdall_detect_device() == 0) {
         app.device_connected = 1;
         gui_show_message("Device detected successfully!", MSG_SUCCESS);
@@ -78,14 +81,14 @@ void handle_device_detect(void) {
 
 void handle_pit_load(void) {
     gui_show_message("Loading PIT file...", MSG_INFO);
+    
     if (heimdall_load_pit("sd:/pit.pit") == 0) {
         app.pit_loaded = 1;
         gui_show_message("PIT file loaded successfully", MSG_SUCCESS);
         PitInfo* pit = heimdall_get_pit_info();
         if (pit) {
             char info[256];
-            // Corrected line 87 in main.c
-            snprintf(info, sizeof(info), "PIT: %u partitions, Device: %s", pit->entry_count, pit->device_name);
+            snprintf(info, sizeof(info), "PIT: %u partitions, Device: %s", (unsigned int)pit->entry_count, pit->device_name);
             gui_log(info, MSG_INFO);
         }
     } else {
@@ -105,11 +108,10 @@ void handle_flashing(void) {
         return;
     }
     
-    // source/main.c around line 105
-     char msg[512]; // Increased from 256 to fix truncation warning
+    char msg[512]; // Buffer increased to prevent truncation warning
     snprintf(msg, sizeof(msg), "Flashing %s to %s...", filename, partition);
+    gui_show_message(msg, MSG_INFO);
     
-    // Pass the function pointer instead of a lambda
     int result = heimdall_flash_file(filename, partition, on_flash_progress);
     
     if (result == 0) {
@@ -148,20 +150,25 @@ void handle_settings(u32 pressed) {
 // --- Main Loop ---
 
 int main(int argc, char **argv) {
-    VIDEO_Init();
-    WPAD_Init();
-    
-    if (!fatInitDefault()) fatInitDefault();
+    // 1. Initial Wii initialization
+    // No need to call VIDEO_Init here if gui_init() does it
+    if (!fatInitDefault()) {
+        // Handle SD card failure
+    }
     
     memset(&app, 0, sizeof(app));
     app.state = STATE_MAIN_MENU;
     app.safe_mode = 1;
     
+    // 2. Load settings from SD before starting GUI
     config_load(&app);
+    
+    // 3. Start Video and Input
     gui_init();
     
+    // 4. Initialize USB Subsystem
     if (heimdall_init() != 0) {
-        gui_show_message("Heimdall initialization failed", MSG_ERROR);
+        gui_show_message("Heimdall USB init failed", MSG_ERROR);
     }
     
     while(running) {
@@ -172,23 +179,26 @@ int main(int argc, char **argv) {
         
         switch(app.state) {
             case STATE_MAIN_MENU:
+                // Ensure these functions exist in your gui.c or placeholders
                 gui_show_main_menu(app.device_connected, app.pit_loaded);
                 handle_main_menu(pressed);
                 break;
             case STATE_DEVICE_DETECT: handle_device_detect(); break;
-            case STATE_PIT_LOAD: handle_pit_load(); break;
-            case STATE_FLASHING: handle_flashing(); break;
-            case STATE_REBOOT: handle_reboot(); break;
+            case STATE_PIT_LOAD:      handle_pit_load(); break;
+            case STATE_FLASHING:      handle_flashing(); break;
+            case STATE_REBOOT:        handle_reboot(); break;
             case STATE_SETTINGS:
                 gui_show_settings(app.auto_reboot, app.verify_flash, app.safe_mode);
                 handle_settings(pressed);
                 break;
         }
         
-        gui_render(); // Use gui_render instead of gui_update to match our previous gui.c
+        // Final screen update
+        gui_render(); 
         VIDEO_WaitVSync();
     }
     
+    // 5. Cleanup
     heimdall_cleanup();
     gui_cleanup();
     config_save(&app);
