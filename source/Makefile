@@ -54,6 +54,3 @@ $(TARGET).elf: $(OBJS)
 $(BUILD)/%.o: $(SOURCES)/%.c
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-clean:
-	rm -rf $(BUILD) $(TARGET).elf $(TARGET).dol $(TARGET).map
