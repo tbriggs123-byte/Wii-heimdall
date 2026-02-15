@@ -57,3 +57,26 @@ void gui_set_progress(float progress, const char* label) {
     printf("] %d%%", (int)(progress * 100.0));
     fflush(stdout);
 }
+// Add these to source/gui.c
+
+void gui_show_main_menu(int device_connected, int pit_loaded) {
+    printf("\x1b[2;0H"); // Move cursor to top
+    printf("--- Wii Heimdall ---\n");
+    printf("Status: %s | PIT: %s\n\n", 
+           device_connected ? "Connected" : "Disconnected",
+           pit_loaded ? "Loaded" : "Not Loaded");
+    printf("1. Detect Device\n2. Load PIT\n3. Flash Recovery\n...");
+}
+
+void gui_show_settings(int auto_reboot, int verify, int safe_mode) {
+    printf("\x1b[2;0H");
+    printf("--- Settings ---\n");
+    printf("Auto-Reboot: %s\n", auto_reboot ? "ON" : "OFF");
+    printf("Verify:      %s\n", verify ? "ON" : "OFF");
+}
+
+void gui_render(void) {
+    // On the Wii console, printf renders immediately, 
+    // but we flush to be sure.
+    fflush(stdout);
+}
