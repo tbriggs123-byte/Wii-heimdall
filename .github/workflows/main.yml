@@ -1,0 +1,32 @@
+name: Build devkitPPC Project
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    # Use an official devkitPro Docker image
+    container: devkitpro/devkitppc:latest 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Environment Variables
+        # The Docker image automatically sets environment variables like DEVKITPRO and DEVKITPPC
+        run: |
+          echo "DEVKITPRO is set to: $DEVKITPRO"
+          echo "DEVKITPPC is set to: $DEVKITPPC"
+
+      - name: Make the Makefile
+        # This step runs the 'make' command in the root of your repository
+        # It assumes your project's Makefile is at the root level
+        run: |
+          cd source
+          make
+    
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: source/wii-heimdall # Can be a file, directory, or wildcard pattern
