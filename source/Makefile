@@ -38,14 +38,12 @@ C_SOURCES = $(wildcard $(SOURCES)/*.c)
 # Object files (mapping source/*.c to build/*.o)
 OBJS = $(patsubst $(SOURCES)/%.c, $(BUILD)/%.o, $(C_SOURCES))
 
-# Default target
-all: $(TARGET).dol
-
-# Create DOL from ELF
 $(TARGET).dol: $(TARGET).elf
-	$(OBJCOPY) -O binary $< $@
-	@echo "Created $(TARGET).dol"
+	@echo "Converting ELF to DOL..."
+	@elf2dol $< $@
 
+# Ensure 'make' builds the dol by default
+all: $(TARGET).dol
 # Link ELF
 $(TARGET).elf: $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
