@@ -7,7 +7,44 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include "heimdall.h"
+#include "pit.h"
 
+// Reference to the PIT loaded in pit.c or heimdall_load_pit
+extern PitInfo current_pit; 
+
+const char* heimdall_determine_partition(const char* filename) {
+    // 1. Strip path (e.g., "sd:/recovery.img" -> "recovery.img")
+    const char* basename = strrchr(filename, '/');
+    if (basename) basename++;
+    else basename = filename;
+
+    // 2. Create a uppercase version for comparison
+    char upper_name[64];
+    strncpy(upper_name, basename, 63);
+    for (int i = 0; upper_name[i]; i++) {
+        upper_name[i] = toupper((unsigned char)upper_name[i]);
+    }
+
+    // 3. Remove extension (e.g., "RECOVERY.IMG" -> "RECOVERY")
+    char* dot = strchr(upper_name, '.');
+    if (dot) *dot = '\0';
+
+    // 4. Try to find an exact match in the PIT
+    static PitEntry found_entry;
+    if (pit_find_partition(&current_pit, upper_name, &found_entry) == 0) {
+        return found_entry.partition_name;
+    }
+
+    // 5. Common aliases / Fallbacks
+    if (strcmp(upper_name, "MODEM") == 0) return "RADIO";
+    if (strcmp(upper_name, "SYSTEM") == 0) return "FACTORYFS";
+    if (strcmp(upper_name, "DBDATA") == 0) return "PARAM";
+
+    return NULL; // Could not determine partition
+}
 // Global state
 static int initialized = 0;
 static int device_detected = 0;
