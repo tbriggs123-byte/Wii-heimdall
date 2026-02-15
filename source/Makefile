@@ -47,14 +47,14 @@ all: $(TARGET).dol
 
 # Create DOL from ELF
 $(TARGET).dol: $(TARGET).elf
-    $(OBJCOPY) -O binary $< $@
-    @echo "Created $(TARGET).dol"
+         $(OBJCOPY) -O binary $< $@
+         @echo "Created $(TARGET).dol"
 
 # Link ELF
 $(TARGET).elf: $(OBJS)
-    $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+         $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 # Compile C files
 $(BUILD)/%.o: $(SOURCES)/%.c
-    @mkdir -p $(BUILD)
-    $(CC) $(CFLAGS) -c $< -o $@
+         @mkdir -p $(BUILD)
+         $(CC) $(CFLAGS) -c $< -o $@
