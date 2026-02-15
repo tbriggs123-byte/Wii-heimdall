@@ -4,34 +4,10 @@
 
 #include <gccore.h>
 #include <stdint.h>
-
+#include "pit.h"
 // Callback types
 typedef int (*ProgressCallback)(float progress, const char* status);
 typedef void (*LogCallback)(const char* message, int type);
-
-// PIT structures
-typedef struct {
-    uint32_t binary_type;
-    uint32_t device_type;
-    uint32_t identifier;
-    uint32_t attributes;
-    uint32_t update_attributes;
-    uint32_t block_size;
-    uint32_t block_count;
-    uint32_t file_offset;
-    uint32_t file_size;
-    char partition_name[32];
-    char flash_filename[32];
-    char fota_filename[32];
-} PitEntry;
-
-typedef struct {
-    uint32_t entry_count;
-    uint32_t unknown1;
-    uint32_t unknown2;
-    char device_name[64];
-    PitEntry entries[64];
-} PitInfo;
 
 // Heimdall functions
 int heimdall_init(void);
