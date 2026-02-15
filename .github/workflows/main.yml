@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: source/boot.dol
+          path: source/wii-heimdall.dol
