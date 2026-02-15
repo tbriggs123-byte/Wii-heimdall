@@ -46,15 +46,15 @@ OBJS = $(addprefix $(BUILD)/,$(notdir $(C_SOURCES:.c=.o)))
 all: $(TARGET).dol
 
 # Create DOL from ELF
-$(TARGET).dol: $(TARGET).elf
-         $(OBJCOPY) -O binary $< $@
-         @echo "Created $(TARGET).dol"
+$(TARGET).dol: $(TARGET).elf \
+    $(OBJCOPY) -O binary $< $@ \
+    @echo "Created $(TARGET).dol"
 
 # Link ELF
-$(TARGET).elf: $(OBJS)
-         $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+$(TARGET).elf: $(OBJS) \
+    $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 # Compile C files
-$(BUILD)/%.o: $(SOURCES)/%.c
-         @mkdir -p $(BUILD)
-         $(CC) $(CFLAGS) -c $< -o $@
+$(BUILD)/%.o: $(SOURCES)/%.c \
+    @mkdir -p $(BUILD) \
+    $(CC) $(CFLAGS) -c $< -o $@
