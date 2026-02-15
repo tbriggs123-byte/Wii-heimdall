@@ -136,3 +136,30 @@ int usb_end_flash_session(void) {
 int usb_is_connected(void) {
     return usb_is_device_open();
 }
+// Add these to the bottom of your existing source/usb.c
+
+int usb_init_device(void) {
+    if (usb_init() < 0) return -1;
+    return usb_open_device(0); // Try to open the first Samsung device found
+}
+
+int usb_start_flash_session(const char* partition) {
+    // Samsung Protocol: Start Flash (0x11) + Partition Name
+    uint8_t cmd[64];
+    memset(cmd, 0, sizeof(cmd));
+    cmd[0] = 0x11; 
+    strncpy((char*)cmd + 1, partition, 31);
+    return usb_send_bulk(cmd, 64);
+}
+
+int usb_send_data(const uint8_t* data, uint32_t size) {
+    return usb_send_bulk(data, size);
+}
+
+int usb_end_flash_session(void) {
+    // Samsung Protocol: End Flash (0x12)
+    uint8_t cmd[16];
+    memset(cmd, 0, sizeof(cmd));
+    cmd[0] = 0x12;
+    return usb_send_bulk(cmd, 16);
+}
