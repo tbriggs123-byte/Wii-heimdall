@@ -40,7 +40,7 @@ C_SOURCES = \
     $(SOURCES)/fileio.c
 
 # Object files
-OBJS = $(addprefix $(BUILD)/,$(notdir $(C_SOURCES:.c=.o)))
+OBJS = $(addprefix $(BUILD)/,$(notdir $(C_SOURCES:.c)))
 
 # Default target
 all: $(TARGET).dol
@@ -55,6 +55,6 @@ $(TARGET).elf: $(OBJS) \
     $(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 # Compile C files
-$(BUILD)/%.o: $(SOURCES)/%.c \
+$(SOURCES)/%.c \
     @mkdir -p $(BUILD) \
     $(CC) $(CFLAGS) -c $< -o $@
