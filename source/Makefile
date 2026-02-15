@@ -1,3 +1,9 @@
+ifeq ($(strip $(DEVKITPPC)),)
+$(error "Please set DEVKITPPC in your environment. export DEVKITPPC=/opt/devkitpro/devkitPPC")
+endif
+
+export PATH := $(DEVKITPPC)/bin:$(PATH)
+
 # Wii Heimdall Complete Makefile
 TARGET = wii-heimdall
 BUILD = build
