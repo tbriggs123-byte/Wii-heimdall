@@ -269,9 +269,9 @@ int samsung_send_file_end(uint32_t file_size, uint32_t checksum) {
 // Wait for ACK
 int samsung_wait_ack(void) {
     uint8_t ack_buffer[16];
-    
-    // Try to receive ACK
-    if (usb_receive_bulk(&ack_buffer, 16) != 0) {
+    uint8_t* p_ack = ack_buffer;  // Create a pointer to the buffer
+    uint32_t len = 16;            // Create a variable for the length
+    if (usb_receive_bulk(&p_ack, &len) != 0) {
         return -1;
     }
     
