@@ -30,8 +30,8 @@ int heimdall_detect_device(void) {
 }
 
 int heimdall_reboot(void) {
-    // Standard Samsung reboot command
-    return usb_send_samsung_cmd(0x03, 0); 
+    // Samsung Download Mode usually responds to "REBT" or "REST"
+    return usb_send_samsung_cmd("REBT", 0); 
 }
 
 // --- Partition Management ---
