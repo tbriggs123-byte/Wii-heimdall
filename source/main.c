@@ -8,20 +8,6 @@
 #include "heimdall.h"
 #include "config.h"
 
-int main(int argc, char **argv) {
-    // Force IOS58 for USB 2.0 Support
-    if (IOS_GetVersion() != 58) {
-        s32 res = IOS_ReloadIOS(58);
-        if (res < 0) {
-            // If this happens, your Wii doesn't have IOS58 installed
-            // USB will fail or be extremely slow
-        }
-    }
-
-    // Standard Inits
-    VIDEO_Init();
-    WPAD_Init();
-
 }
 // Application state and data (Matches your struct)
 typedef enum {
@@ -165,6 +151,17 @@ void handle_settings(u32 pressed) {
 // --- Main Loop ---
 
 int main(int argc, char **argv) {
+        // Force IOS58 for USB 2.0 Support
+    if (IOS_GetVersion() != 58) {
+        s32 res = IOS_ReloadIOS(58);
+        if (res < 0) {
+            // If this happens, your Wii doesn't have IOS58 installed
+            // USB will fail or be extremely slow
+        }
+    }
+    
+    WPAD_init();
+    
     // 1. Initial Wii initialization
     // No need to call VIDEO_Init here if gui_init() does it
     if (!fatInitDefault()) {
