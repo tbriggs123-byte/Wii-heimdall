@@ -8,8 +8,7 @@
 #include "heimdall.h"
 #include "config.h"
 
-}
-// Application state and data (Matches your struct)
+// --- State Machine Definitions ---
 typedef enum {
     STATE_MAIN_MENU,
     STATE_DEVICE_DETECT,
@@ -19,6 +18,7 @@ typedef enum {
     STATE_SETTINGS
 } AppState;
 
+// Note: Ensure this struct matches what you have in config.h
 typedef struct {
     AppState state;
     AppState prev_state;
@@ -36,12 +36,12 @@ static AppData app;
 static int running = 1;
 
 // --- Callback for Flashing Progress ---
-// Matches signature: void gui_set_progress(float progress, const char* label);
 int on_flash_progress(float progress, const char* status) {
     app.flash_progress = progress;
-    strncpy(app.status_text, status, sizeof(app.status_text)-1);
+    if (status) {
+        strncpy(app.status_text, status, sizeof(app.status_text)-1);
+    }
     
-    // Updated to match gui.h signature
     gui_set_progress(progress, status);
     return 1; 
 }
@@ -66,7 +66,6 @@ void handle_main_menu(u32 pressed) {
 }
 
 void handle_device_detect(void) {
-    // Matches signature: void gui_show_message(const char* message, int type);
     gui_show_message("Detecting Samsung device...", MSG_INFO);
     
     if (heimdall_detect_device() == 0) {
@@ -109,7 +108,7 @@ void handle_flashing(void) {
         return;
     }
     
-    char msg[512]; // Buffer increased to prevent truncation warning
+    char msg[512]; 
     snprintf(msg, sizeof(msg), "Flashing %s to %s...", filename, partition);
     gui_show_message(msg, MSG_INFO);
     
@@ -151,36 +150,30 @@ void handle_settings(u32 pressed) {
 // --- Main Loop ---
 
 int main(int argc, char **argv) {
-        // Force IOS58 for USB 2.0 Support
+    // 1. Force IOS58 for USB 2.0 Support
     if (IOS_GetVersion() != 58) {
-        s32 res = IOS_ReloadIOS(58);
-        if (res < 0) {
-            // If this happens, your Wii doesn't have IOS58 installed
-            // USB will fail or be extremely slow
-        }
+        IOS_ReloadIOS(58);
     }
     
-    WPAD_init();
+    // 2. Start Video and Input first (so we can see error messages)
+    gui_init();
     
-    // 1. Initial Wii initialization
-    // No need to call VIDEO_Init here if gui_init() does it
+    // 3. Initialize SD Card
     if (!fatInitDefault()) {
-        // Handle SD card failure
+        gui_show_message("SD Card failed to initialize!", MSG_ERROR);
     }
     
+    // 4. Set Initial State
     memset(&app, 0, sizeof(app));
     app.state = STATE_MAIN_MENU;
     app.safe_mode = 1;
     
-    // 2. Load settings from SD before starting GUI
+    // Load existing settings if any
     config_load(&app);
     
-    // 3. Start Video and Input
-    gui_init();
-    
-    // 4. Initialize USB Subsystem
+    // 5. Initialize USB Subsystem
     if (heimdall_init() != 0) {
-        gui_show_message("Heimdall USB init failed", MSG_ERROR);
+        gui_show_message("USB init failed! Connect to Port 0.", MSG_ERROR);
     }
     
     while(running) {
@@ -191,7 +184,6 @@ int main(int argc, char **argv) {
         
         switch(app.state) {
             case STATE_MAIN_MENU:
-                // Ensure these functions exist in your gui.c or placeholders
                 gui_show_main_menu(app.device_connected, app.pit_loaded);
                 handle_main_menu(pressed);
                 break;
@@ -205,15 +197,13 @@ int main(int argc, char **argv) {
                 break;
         }
         
-        // Final screen update
         gui_render(); 
         VIDEO_WaitVSync();
     }
     
-    // 5. Cleanup
+    // 6. Cleanup
     heimdall_cleanup();
     gui_cleanup();
-    config_save(&app);
     
     return 0;
 }
