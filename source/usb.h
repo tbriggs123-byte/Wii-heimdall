@@ -28,7 +28,8 @@ int usb_send_control(uint8_t request, uint16_t value, uint16_t index,
                      uint8_t* data, uint16_t length);
 
 // Samsung specific
-int usb_send_samsung_cmd(uint8_t cmd, uint32_t param);
+// Change this line in usb.h:
+int usb_send_samsung_cmd(const char* cmd_str, uint32_t param);
 int usb_enter_download_mode(void);
 int usb_get_device_info_samsung(char* model, char* serial);
 
