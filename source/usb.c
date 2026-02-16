@@ -16,7 +16,7 @@ static const uint32_t BUFFER_SIZE = 0x10000;
 static u8 endpoint_out = 0x01;
 static u8 endpoint_in = 0x81;
 
-int usb_init(void) {
+int usb_init_device(void) {
     if (USB_Initialize() < 0) return -1;
     if (!usb_buffer) {
         // Allocate 32-byte aligned memory for DMA
@@ -106,6 +106,18 @@ int usb_send_data(const uint8_t* data, uint32_t size) {
     }
     return 0;
 }
+
+void usb_cleanup(void) {
+    if (usb_device_fd >= 0) {
+        USB_CloseDevice(&usb_device_fd);
+        usb_device_fd = -1;
+    }
+    if (usb_buffer) {
+        free(usb_buffer);
+        usb_buffer = NULL;
+    }
+}
+
 // This allows heimdall.c to check if the device is still there
 int usb_is_connected(void) {
     return (usb_device_fd >= 0);
