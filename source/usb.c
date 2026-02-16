@@ -106,3 +106,18 @@ int usb_send_data(const uint8_t* data, uint32_t size) {
     }
     return 0;
 }
+// This allows heimdall.c to check if the device is still there
+int usb_is_connected(void) {
+    return (usb_device_fd >= 0);
+}
+
+// This allows heimdall.c to properly close the Samsung session
+int usb_end_flash_session(void) {
+    if (usb_device_fd < 0) return -1;
+    
+    // Send the Samsung "End Session" command
+    // Some devices use "ENDC", others just need the session closed
+    int res = usb_send_samsung_cmd("ENDC", 0);
+    
+    return res;
+}
