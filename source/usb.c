@@ -35,18 +35,39 @@ void usb_cleanup(void) {
     usb_initialized = 0;
 }
 
-int usb_init_device(void) {
-    if (usb_init() < 0) return -1;
-    return usb_open_device(0);
-}
 
-// --- Device Handle Management ---
+#define SAMSUNG_VID 0x04E8
+#define SAMSUNG_PID 0x685D
 
 int usb_open_device(int index) {
     if (!usb_initialized) return -1;
-    s32 result = USB_OpenDevice(index, 0, 0, &usb_device_fd);
+
+    // Small delay to allow the hardware to settle
+    usleep(100000);
+
+    // Try to open specifically with Samsung's IDs
+    // This forces the Wii to look for the phone's hardware signature
+    s32 result = USB_OpenDevice(index, SAMSUNG_VID, SAMSUNG_PID, &usb_device_fd);
+    
+    if (result < 0) {
+        // Fallback: try common variant PID
+        result = USB_OpenDevice(index, SAMSUNG_VID, 0x68C0, &usb_device_fd);
+    }
+
     if (result < 0) return -1;
     return 0;
+}
+
+int usb_init_device(void) {
+    if (usb_init() < 0) return -1;
+
+    // Loop through the first few available USB slots
+    for (int i = 0; i < 2; i++) {
+        if (usb_open_device(i) == 0) {
+            return 0;
+        }
+    }
+    return -1;
 }
 
 void usb_close_device(void) {
